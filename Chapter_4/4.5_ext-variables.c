@@ -1,13 +1,13 @@
-/* Add the commands to print the top elements of the stack wothout popping, to
-duplTopicate it, and to swap the top two elements. Add a command to clear the stack */
+/* Add access to library functions like sin, exp, and pow. */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define MAXOP   100
-#define NUMBER  '0'
+#define MAXOP 100
+#define NUMBER '0'
 
-int getop(char []);
+int getop(char[]);
 void push(double);
 double pop(void);
 void printTop(void);
@@ -15,16 +15,17 @@ void duplTop(void);
 void swapTop(void);
 void clearStack(void);
 
-
 /* reverse Polish calculator */
 
-int main(){
+int main()
+{
     int type;
     double op2, op1;
     char s[MAXOP];
     int aux = 0;
 
-    while ((type = getop(s)) != EOF){
+    while ((type = getop(s)) != EOF)
+    {
         switch (type)
         {
         case NUMBER:
@@ -39,7 +40,7 @@ int main(){
         case '-':
             op2 = pop();
             // printf("%f\n",op2);
-            push(pop() - op2); 
+            push(pop() - op2);
             break;
         case '/':
             op2 = pop();
@@ -53,7 +54,7 @@ int main(){
             break;
         case '%':
             op2 = pop();
-            push((int) pop() % (int) op2);
+            push((int)pop() % (int)op2);
             break;
         case 't':
             printTop();
@@ -61,7 +62,7 @@ int main(){
         case 'd':
             duplTop();
             break;
-        case 's':
+        case 'w':
             swapTop();
             break;
         case 'c':
@@ -77,14 +78,16 @@ int main(){
 
 /* ----------------------------------------------------------------------------------------- */
 
-#define MAXVAL  100
+#define MAXVAL 100
 int sp = 0;
-double val [MAXVAL];
+double val[MAXVAL];
 
 /* push: push f onto value stach */
-void push(double f){
+void push(double f)
+{
     // printf("%f\n", f);
-    if(sp < MAXVAL){
+    if (sp < MAXVAL)
+    {
         val[sp++] = f;
         // printf("%f\n", val[sp-1]);
     }
@@ -93,38 +96,45 @@ void push(double f){
 }
 
 /* pop: pop and return top value from stack */
-double pop(void){
-    if(sp > 0 ){
+double pop(void)
+{
+    if (sp > 0)
+    {
         return val[--sp];
     }
-    else{
+    else
+    {
         printf("error: stack empty\n");
         return 0.0;
     }
 }
 
-void printTop(void){
-    for (int i = sp-1; i > sp-3; i--)
+void printTop(void)
+{
+    for (int i = sp - 1; i > sp - 3; i--)
     {
         printf("%f\n", val[i]);
     }
 }
 
-void duplTop(void){
+void duplTop(void)
+{
     // printf("sp: %d\n", sp);
-    val[sp++] = val[sp-1];
+    val[sp++] = val[sp - 1];
     // printf("sp: %d\n", sp);
 }
 
-void swapTop(void){
+void swapTop(void)
+{
     int aux;
 
-    aux = val[sp-2];
-    val[sp-2] = val[sp-1];
-    val[sp-1] = aux;
+    aux = val[sp - 2];
+    val[sp - 2] = val[sp - 1];
+    val[sp - 1] = aux;
 }
 
-void clearStack(){
+void clearStack()
+{
     sp = 0;
 }
 
@@ -133,38 +143,48 @@ void clearStack(){
 #include <ctype.h>
 
 int getch(void);
-void ungetch(int);
 
 /* getop: get next characteror numeric operand */
-int getop(char s[]){
+int getop(char s[])
+{
     int i, c;
+    static int lastC = 0;
 
-    while ((s[0] = c = getch()) == ' ' || c == '\t')
-        ;
-        
-    s[1] = '\0'; /* lo asigna por las dudas, no sabe si lo proximo que lea 
-                    va a ser un digito */
-    i = 0;
-    if (c == '-')
-        if(!isdigit(s[++i] = c = getch())){
-            ungetch(c);
-            c = s[0];
-        }
-        
+    if (lastC == 0)
+        c = getch();
+    else
+    {
+        c = lastC;
+        lastC = 0;
+    }
+
+    while ((s[0] = c) == ' ' || c == '\t')
+    {
+        c = getch();
+    }
+
+    s[1] = '\0';
     if (!isdigit(c) && c != '.')
         return c;
-    if(isdigit(c)){
-        /* aunque impresionante es muy dificil de leer >.< */
-        while (isdigit(s[++i] = c = getch()))/* leer numero de mas de una cifra
-                                                no sabe que hacer si aparece un . */
-            ;
+
+    i = 0;
+    if (isdigit(c)){
+        printf("%c",s[i]);
+        while (isdigit(s[++i] = c = getch()))
+        {
+            printf("%d",s[i]);
+        }
     }
     if (c == '.')
         while (isdigit(s[++i] = c = getch()))
+        {
             ;
+        }
     s[i] = '\0';
+
     if (c != EOF)
-        ungetch(c);
+        lastC = c;
+
     return NUMBER;
 }
 
@@ -173,19 +193,21 @@ int getop(char s[]){
 char buf[BUFFSIZE];
 int bufp = 0;
 
-int getch(void){
+int getch(void)
+{
     // printf("%d\n", bufp);
-    return  (bufp > 0) ? buf[--bufp] : getchar();
+    return (bufp > 0) ? buf[--bufp] : getchar();
 }
 
-void ungetch(int c){
+void ungetch(int c)
+{
     if (bufp >= BUFFSIZE)
     {
-      printf("ungetch: too many characters\n");
+        printf("ungetch: too many characters\n");
     }
-    else{
+    else
+    {
         // printf("%d c es un: %d\n", bufp, c);
         buf[bufp++] = c;
     }
 }
-    
