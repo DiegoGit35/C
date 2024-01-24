@@ -63,7 +63,6 @@ int sp = 0;
 
 void push(double f)
 {
-    printf("pushed: %g\n", f);
     if (sp < MAXVAL)
     {
         val[sp++] = f;
