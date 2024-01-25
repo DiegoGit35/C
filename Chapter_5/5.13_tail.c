@@ -9,11 +9,11 @@ fixed size*/
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFLINES 10 /* default # of lines to print */
-#define LINES 100   /* max # of lines to print */
-#define MAXLEN 100  /* max lenght of an input line */
+#define DEFLINES 10 
+#define LINES 100   
+#define MAXLEN 100  
 
-int getLine(char [], int );
+// int getLine(char [], int );
 void error(char *);
 int getLine(char *, int);
 
@@ -26,18 +26,15 @@ int main(int argc, char *argv[])
     char *lineptr[LINES];
     int first, i, last, len, n, nlines;
 
-    printf("argc vale: %d\n", argc);
 
     if (argc == 1)
-        printf("error, no hay suficientes argumentos\n");
+        printf("error, not enough arguments");
     else if (*(++argv)[0] == '-' && argc == 3)
     {
         n = atoi(*++argv);
-        printf("*argv vale: %s\n", *argv);
     }
     else
         n = DEFLINES;
-    printf("n vale: %d\n", n);
 
     for (i = 0; i < LINES; i++)
         lineptr[i] = NULL;
@@ -50,8 +47,8 @@ int main(int argc, char *argv[])
     {
         if (p + len + 1 >= bufend)
             p = buf;
-        lineptr[last] = p;
-        strcpy(lineptr[last], line);
+        lineptr[last] = p; 
+        strcpy(lineptr[last], line); 
         if (++last >= LINES)
             last = 0;
         p += len + 1;
@@ -67,7 +64,9 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-int getLine(char s[], int lim){
+
+/* cambiar array por puntero */
+int getLine(char *s, int lim){
     int c, i;
 
     for (i = 0; i < lim-1 && (c = getchar()) != EOF && c != '\n'; ++i)
