@@ -27,9 +27,9 @@ int main(int argc, char const *argv[])
     char c;
     int nlines;
 
-    if ((*++argv )[0] == '-' && argc > 1)
-        while(c = *++argv[0])
-            {
+    if ((*++argv)[0] == '-' && argc > 1)
+        while (c = *++argv[0])
+        {
             switch (c)
             {
             case 'n':
@@ -53,7 +53,7 @@ int main(int argc, char const *argv[])
 
     if ((nlines = readLines(lineptr, MAXLINES)) >= 0)
     {
-        Qsort((void **)lineptr, 0, nlines - 1, (int (*)(void *, void *))(option & NUMERIC ? numcmp :  Mystrcmp));
+        Qsort((void **)lineptr, 0, nlines - 1, (int (*)(void *, void *))(option & NUMERIC ? numcmp : Mystrcmp));
         if (option & REVERSE)
             Rev((void **)lineptr, nlines);
         writeLines(lineptr, nlines);
@@ -81,25 +81,47 @@ int numcmp(const char *s1, const char *s2)
         return 0;
 }
 
+int isAlfaNum(char s)
+{
+    return (64 < s && s < 91 || 97 <= s && s < 122 || s == ' ');
+}
+
+int toLowerCase(char s)
+{
+    char aux;
+    aux = s;
+    if (64 < s && s < 91)
+    {
+        aux += 32;
+    }
+    return aux;
+}
+
 int Mystrcmp(const char *s1, const char *s2)
 {
-    int i = 0;
-    char a, b;
-    for (int i = 0; i < MAXLEN && s1[i] != '\0' && s2[i] != '\0'; i++)
+    char aux1, aux2;
+    int dirOrder = option & DIRECTORY;
+    int foldOrder = option & FOLD;
+    do
     {
-        a = s1[i];
-        b = s2[i];
-        if (64 < s1[i] && s1[i] < 91)
-            a += 32;
-        if (64 < s2[i] && s2[i] < 91)
-            b += 32;
-        if (a - b == 0)
-            continue;
-        else
+        // aux1 = s1[i];
+        // aux2 = s2[i];
+        if (dirOrder)
         {
-            return a - b;
+            while (!isAlfaNum(*s1) && *s1 != ' ' && *s1 != '\0')
+                s1++;
+            while (!isAlfaNum(*s2) && *s2 != ' ' && *s2 != '\0')
+                s2++;
         }
-    }
+        aux1 = foldOrder ? toLowerCase(*s1) : *s1;
+        s1++;
+        aux2 = foldOrder ? toLowerCase(*s2) : *s2;
+        s2++;
+
+        if (aux1 == aux2 && aux1 == '\0')
+            return 0;
+    } while (aux1 == aux2);
+    return aux1 - aux2;
 }
 
 void swap(void *v[], int, int);
