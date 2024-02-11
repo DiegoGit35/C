@@ -1,6 +1,3 @@
-/* Excercise 6-1. Our version of getword does not properly handle underscores,
-string constants, comments, or preprocessor control lines. Write a better version */
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -82,42 +79,40 @@ struct key
 };
 
 int getWord(char *, int);
-int binSearch(char *, struct key[], int n);
+struct key *binsearch(char *, struct key *, int);
 
 int main()
 {
-    int n;
-    char word[MAXWORD];
+  char word[MAXWORD];
+  struct key *p;
 
-    while (getWord(word, MAXWORD) != EOF)
-        if (isalpha(word[0]))
-            if ((n = binSearch(word, keytab, NKEYS)) >= 0)
-                keytab[n].count++;
-    printf("NKEYS vale: %ld\n", NKEYS);
-    for (n = 0; n < NKEYS; n++)
-        if (keytab[n].count > 0)
-            printf("%4d %s\n", keytab[n].count, keytab[n].word);
-    return 0;
+  while(getWord(word, MAXWORD) != EOF)
+    if(isalpha(word[0]))
+      if ((p = binsearch(word, keytab, NKEYS)) != NULL)
+        p->count++;
+  for (p = keytab; p < keytab + NKEYS; p++)
+    if(p->count > 0)
+      printf("%4d %s\n", p->count, p->word);
+
+  return 0;
 }
 
-int binSearch(char *word, struct key tab[], int n)
-{
-    int cond;
-    int low, high, mid;
+struct key *binsearch(char *word, struct key *tab, int n) {
+  int cond;
+  struct key *low = &tab[0];
+  struct key *high = &tab[n];
+  struct key *mid;
 
-    low = 0;
-    high = n - 1;
-    while (low <= high)
-    {
-        mid = (low + high) / 2;
-        if ((cond = strcmp(word, tab[mid].word)) < 0)
-            high = mid - 1;
-        else if (cond > 0)
-            low = mid + 1;
-        else
-            return mid;
-    }
-    return -1;
+  while (low < high){
+    mid = low + (high - low) / 2;
+    if ((cond = strcmp(word, mid->word)) < 0)
+      high = mid;
+    else if(cond > 0)
+        low = mid + 1;
+    else
+      return mid;
+  }    
+  return NULL;
 }
 
 int getWord(char *word, int lim)
@@ -125,10 +120,6 @@ int getWord(char *word, int lim)
     int c, getch(void);
     void ungetch(int);
     char *w = word;
-    // handle underscores
-    // handle string constants
-    // handle comments
-    // handle proprocessor control lines
     while (isspace(c = getch()))
         ;
     if (c != EOF)
