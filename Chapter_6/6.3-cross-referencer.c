@@ -1,16 +1,24 @@
+/* Write a cross-refgerence that prints a list of all words in a document and, for each word, a list of the line numbers on which ir occurs. Remove noise words like "the", "and" and so on */
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #define MAXWORD 100
 
-struct tnode *addtree(struct tnode *, char *);
-void treeprint(struct tnode *);
+struct linkList {
+  int lnum;
+  struct linkList *ptr;
+};
+
+struct tnode *addTreex(struct tnode *, char *, int);
+void treexPrint(struct tnode *);
 int getWord(char *, int);
+int noiseWord(char *);
 
 struct tnode{
   char *word;
-  int count;
+  struct linkList *lines;
   struct tnode *left;
   struct tnode *right;
 };
@@ -19,22 +27,63 @@ int main ()
 {
   struct tnode *root;
   char word[MAXWORD];
+  int lineNum = 1;
 
   root = NULL;
-  while(getWord(word, MAXWORD) != EOF)
-    if (isalpha(word[0]))
-      root = addtree(root, word);
-
-  treeprint(root);
+  while (getWord(word, MAXWORD) != EOF)
+    if(isalpha(word[0]) && noiseWord(word) == -1)
+      root = addTreex(root, word, lineNum);
+    else if (word[0] == '\n') {
+      lineNum++;
+    } 
+  treexPrint(root);
   return 0;
 }
+
+struct tnode *talloc(void);
+struct linkList *lalloc(void);
+void addln(struct tnode *, int);
+
+struct tnode *addTreex(struct tnode *p, char *w, int lineNum){
+  int cond;
+
+  if (p == NULL) {
+    p = talloc();
+    p->word = strdup(w);
+    p->lines = lalloc();
+    p->lines->lnum = lineNum;
+    p->lines->ptr = NULL;
+    p->left = p->right = NULL;
+  }
+  else if ((cond = strcmp(w, p->word)) == 0)
+    addln(p, lineNum);
+  else if(cond < 0)
+      p->left = addTreex(p->left, w, lineNum);
+  else 
+    p->right = addTreex(p->right, w, lineNum);
+  return p;
+}
+
+void addln(struct tnode *p, int lineNum){
+  struct linkList *temp;
+  temp = p->lines;
+  while (temp->ptr != NULL && temp->lnum != lineNum)
+    temp = temp->ptr;
+  if(temp->lnum != lineNum){
+    temp->ptr = lalloc();
+    temp->ptr->lnum = lineNum;
+    temp->ptr->ptr = NULL;
+  }
+}
+
+
 
 int getWord(char *word, int lim)
 {
     int c, getch(void);
     void ungetch(int);
     char *w = word;
-    while (isspace(c = getch()))
+    while (isspace(c = getch()) && c != '\n')
         ;
     if (c != EOF)
         *w++ = c;
@@ -80,30 +129,41 @@ void ungetch(int c)
 struct tnode *talloc(void);
 char *strDup(char *);
 
-struct tnode *addtree(struct tnode *p, char *w){
-  int cond;
-
-  if (p == NULL){
-    p = talloc();
-    p->word = strDup(w);
-    p->count = 1;
-    p->left = p->right = NULL;
-  } else if((cond = strcmp(w, p->word)) == 0)
-      p->count++;
-  else if(cond < 0){
-    p->left = addtree(p->left, w);
-  }else {
-    p->right = addtree(p->right, w);
+void treexPrint(struct tnode *p){
+  struct linkList *temp;
+  if (p != NULL){
+    treexPrint(p->left);
+    printf("%10s: ", p->word);
+    for(temp = p->lines; temp != NULL; temp = temp->ptr)
+      printf("%4d ", temp->lnum);
+    printf("\n");
+    treexPrint(p->right);
   }
-  return p;
 }
 
-void treeprint(struct tnode *p){
-  if(p != NULL){
-    treeprint(p->left);
-    printf("%4d %s\n", p->count, p->word);
-    treeprint(p->right);
+struct linkList *lalloc(void){
+  return (struct linkList *) malloc(sizeof(struct linkList));
+}
+
+int noiseWord(char *w){
+  static char *nw[] = {
+    "a", "an", "and", "are", "in",
+    "is", "of", "or", "that", "the",
+    "this", "to"
+  };
+  int cond, mid;
+  int low = 0;
+  int high = sizeof(nw) / sizeof(char *) - 1;
+  while (low <= high){
+    mid = (low + high) / 2;
+    if((cond = strcmp(w, nw[mid]) < 0))
+      high = mid - 1;
+    else if (cond > 0)
+      low = mid + 1;
+    else 
+      return mid;
   }
+  return -1;
 }
 
 #include <stdlib.h>
